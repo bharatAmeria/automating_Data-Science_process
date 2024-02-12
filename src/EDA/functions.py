@@ -35,6 +35,7 @@ def univariate(df):
         plt.show()
     return output_df
 
+
 def scatterplot(df, feature, label, roundto=4, linecolor='orange'):
     import matplotlib.pyplot as plt
     import seaborn as sns
@@ -61,6 +62,7 @@ def scatterplot(df, feature, label, roundto=4, linecolor='orange'):
 
     plt.text(.95, 0.2, textstr, fontsize=12, transform=plt.gcf().transFigure)
     plt.show()
+
 
 def bar_chart(df, feature, label, roundto=4, p_threshold=0.05):
     import matplotlib.pyplot as plt
@@ -114,6 +116,7 @@ def bar_chart(df, feature, label, roundto=4, p_threshold=0.05):
     plt.text(.95, 0.10, textstr, fontsize=12, transform=plt.gcf().transFigure)
     plt.show()
 
+
 def crosstab_(df, feature, label, roundto=4):
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -135,6 +138,7 @@ def crosstab_(df, feature, label, roundto=4):
     sns.heatmap(ct_df, annot=True, fmt='d', cmap='coolwarm')
 
     plt.show()
+
 
 def bivariate_stats(df, label, roundto=4):
     import pandas as pd
@@ -186,6 +190,7 @@ def bivariate_stats(df, label, roundto=4):
                                           round(f, roundto), '-']
 
     return output_df.sort_values(by=['p'], ascending=True)
+
 
 '''
  how to use 
