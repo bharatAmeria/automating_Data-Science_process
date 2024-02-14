@@ -179,9 +179,7 @@ def clean_outliers(df, features=None, messages=True, method="remove", skew_thres
 """
  Newer All at Once Method Based on Clustering -> Best for small datasets that won't take as much processing time
 """
-def clean_outliers_newer(df, features=None, messages=True, drop_percent=0.02, distance='manhattan', min_samples=5):
-    if features is None:
-        features = []
+def clean_outliers_newer(df, features=[], messages=True, drop_percent=0.02, distance='manhattan', min_samples=5):
     import pandas as pd
     import numpy as np
     import seaborn as sns
@@ -206,14 +204,40 @@ def clean_outliers_newer(df, features=None, messages=True, drop_percent=0.02, di
                                columns=df_temp.columns, index=df_temp.index)
 
         # Calculate the number of outliers based on a range of EPS values
-        db = DBSCAN(metric=distance, min_samples=min_samples, eps=0.5).fit(df_temp)
-        df['outlier'] = db.labels_
+        outliers_per_eps = []
+        outliers = df_temp.shape[0]
+        eps = 0
+        if df_temp.shape[0] < 500:
+            iterator = 0.01
+        elif df_temp.shape[0] < 2000:
+            iterator = 0.05
+        elif df_temp.shape[0] < 10000:
+            iterator = 0.2
+        elif df_temp.shape[0] < 25000:
+            iterator = 0.5
 
-        #  Drop rows that are outliers
-        df = df[df['outlier'] != -1]
+        while outliers > 0:
+            eps += 0.01
+            db = DBSCAN(metric=distance, min_samples=min_samples, eps=eps).fit(df_temp)
+            outliers = np.count_nonzero(db.labels_ == -1)
+
+            if messages:
+                print(f"eps: {round(eps, 2)}, outliers: {outliers}.percent:"
+                      f" {round((outliers / df_temp.shape[0]) * 100, 3)}%")
+        drops = min(outliers_per_eps, key=lambda x: abs(x - round(df_temp.shape[0] * drop_percent)))
+        eps = (outliers_per_eps.index(drops) + 1) * iterator
+        db = DBSCAN(metric=distance, min_samples=min_samples, eps=eps).fit(df_temp)
+        df['outlier'] = db.labels_
 
         if messages:
             print(f"{df[df['outlier'] == -1].shape[0]} outlier rows removed from the Dataframe")
+            sns.lineplot(x=range(1, len(outliers_per_eps) + 1), y=outliers_per_eps)
+            sns.scatterplot(x=[eps/iterator], y=[drops])
+            plt.xlabel(f'eps (divide by {iterator}')
+            plt.ylabel(f'drop_percent ({drop_percent})')
+            plt.show()
 
+        #  Drop rows that are outliers
+        df = df[df['outlier'] != -1]
 
         return df
