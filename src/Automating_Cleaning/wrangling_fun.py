@@ -103,7 +103,7 @@ def bin_categories(df, features=None, cutoff=0.05, replace_with='Other', message
 """
 
 
-def clean_outliers(df, features=None, messages=True, method="remove", skew_threshold=1):
+def clean_outliers(df, features=None, messages=True, method="remove", skew_threshold=1, min_count=0, max_count=0):
     if features is None:
         features = []
     import pandas as pd
@@ -179,7 +179,7 @@ def clean_outliers(df, features=None, messages=True, method="remove", skew_thres
 """
  Newer All at Once Method Based on Clustering -> Best for small datasets that won't take as much processing time
 """
-def clean_outliers_newer(df, features=[], messages=True, drop_percent=0.02, distance='manhattan', min_samples=5):
+def clean_outliers_newer(df, messages=True, drop_percent=0.02, distance='manhattan', min_samples=5):
     import pandas as pd
     import numpy as np
     import seaborn as sns
@@ -187,10 +187,11 @@ def clean_outliers_newer(df, features=[], messages=True, drop_percent=0.02, dist
     from sklearn.cluster import DBSCAN
     from sklearn import preprocessing
 
-#   clean the dataset first
+    # clean the dataset first
     if messages:
         print(f"{df.shape[1] - df.dropna(axis='columns').shape[1]} columns were dropped first due to missing data")
         df.dropna(axis='columns', inplace=True)
+
     if messages:
         print(f"{df.shape[0] - df.dropna().shape[0]} rows were dropped first due to missing data")
         df.dropna(inplace=True)
@@ -207,6 +208,7 @@ def clean_outliers_newer(df, features=[], messages=True, drop_percent=0.02, dist
         outliers_per_eps = []
         outliers = df_temp.shape[0]
         eps = 0
+        iterator = 0
         if df_temp.shape[0] < 500:
             iterator = 0.01
         elif df_temp.shape[0] < 2000:
